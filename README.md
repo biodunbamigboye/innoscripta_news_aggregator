@@ -7,5 +7,13 @@ This platform aggregates news from different platforms using api Integrations, f
 - [Newsapa.ai](https://newsapi.ai)
 - [Newsapi.org](https://newsapi.org)
 - [New York Times API](https://nytimes.com) and
-- [The Guardians API Integration](https://open-platform.theguardian.com/).
-
+- [The Guardians API Integration](https://open-platform.theguardian.com/)
+ 
+## Installation
+- Clone the repository
+- Install the requirements using `composer install`
+- Create a `.env` file by copying the `.env.example` file
+- Generate a new key using `php artisan key:generate`
+- Add the database credentials to the `.env` file
+- Run the migrations and seed database using `php artisan migrate --seed`
+- Run the application using `php artisan serve`
