@@ -5,9 +5,9 @@ return [
         'api_key' => env('THE_GUARDIAN_API_KEY', ''),
         'base_url' => env('THE_GUARDIAN_BASE_URL', ''),
     ],
-    'nytimes' => [
-        'api_key' => env('NYTIMES_API_KEY', ''),
-        'base_url' => '',
+    'new_york_times' => [
+        'api_key' => env('NEW_YORK_TIMES_API_KEY', ''),
+        'base_url' => env('NEW_YORK_TIMES_BASE_URL', ''),
     ],
     'news_api' => [
         'api_key' => env('NEWS_API_API_KEY', ''),
