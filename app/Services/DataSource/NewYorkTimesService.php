@@ -12,28 +12,29 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class NewsAPIService extends DataAggregatorService implements DataSourceContract
+class NewYorkTimesService extends DataAggregatorService implements DataSourceContract
 {
-    protected string $identifier = 'news-api';
+    protected string $identifier = 'new-york-times';
 
     public function __construct()
     {
-        $this->http = Http::baseUrl(config('aggregators.news_api.base_url'))
+        $this->http = Http::baseUrl(config('aggregators.new_york_times.base_url'))
             ->withHeaders([
                 'Accept' => 'application/json',
-                'X-Api-Key' => config('aggregators.news_api.api_key'),
+            ])->withQueryParameters([
+                'api-key' => config('aggregators.new_york_times.api_key'),
             ]);
     }
 
     public function getNews(DataSource $dataSource, array $parameters = []): ?array
     {
-        $response = $this->http->get($dataSource->uri, $parameters)->json();
+        $response = $this->http->get($dataSource->uri, [])->json();
 
-        if ($response['status'] !== 'ok') {
-            Log::info($response['message'] ?? 'An error occurred while fetching news');
-
-            return null;
-        }
+        //        if (($response['status'] ?? null) !== 'Ok') {
+        //            Log::info($response['message'] ?? 'An error occurred while fetching news, New York Times');
+        //
+        //            return null;
+        //        }
 
         return $response;
     }
@@ -41,36 +42,19 @@ class NewsAPIService extends DataAggregatorService implements DataSourceContract
     public function processNews($page = 1): void
     {
         $dataSource = $this->getModel();
-        $parameters = [...$this->resolveParameters($dataSource), 'page' => $page];
-        $response = $this->getNews($dataSource, $parameters);
+        $response = $this->getNews($dataSource);
 
         if (! $response
         ) {
             return;
         }
 
-        $this->storeToDatabase($dataSource, $response['articles']);
-
-        $perPage = $parameters['pageSize'];
-        $totalResults = $response['totalResults'];
-        $totalPages = ceil($totalResults / $perPage);
-
-        for ($i = 2; $i <= $totalPages; $i++) {
-            $parameters['page'] = $i;
-            $response = $this->getNews($dataSource, $parameters);
-
-            if (! $response || ($this->processLimit && ($this->processLimit <= $this->processCount))) {
-                break;
-            }
-
-            $this->storeToDatabase($dataSource, $response['articles']);
-            $this->processLimit += count($response['articles']);
-        }
-
+        $this->storeToDatabase($dataSource, $response['results']);
     }
 
     public function storeToDatabase(DataSource $dataSource, array $news): void
     {
+        Log::info('here');
         DB::transaction(function () use ($dataSource, $news) {
             // get duplicates in db by data source id and url
             $duplicates = Article::where('data_source_id', $dataSource->id)
@@ -83,15 +67,16 @@ class NewsAPIService extends DataAggregatorService implements DataSourceContract
                 return [
                     'id' => (string) Str::ulid(),
                     'data_source_id' => $dataSource->id,
-                    'category' => $dataSource->fiters['category']['default'] ?? null,
-                    'author' => $item['author'] ?? null,
-                    'source' => $item['source']['name'] ?? null,
+                    'data_source_identifier' => $item['uri'] ?? null,
+                    'category' => $item['section'] ?? null,
+                    'author' => $item['byline'] ?? null,
+                    'source' => 'The New York Times',
                     'title' => $item['title'] ?? '',
-                    'description' => $item['description'] ?? null,
-                    'story_url' => $item['url'] ?? '',
-                    'image_url' => $item['urlToImage'] ?? null,
+                    'description' => $item['abstract'] ?? null,
+                    'story_url' => $item['url'],
+                    'image_url' => $item['multimedia'][0]['url'] ?? null,
                     'content' => self::getNewsContent($item['url']),
-                    'published_at' => Carbon::parse($item['publishedAt'] ?? Carbon::now()),
+                    'published_at' => Carbon::parse($item['published_date'] ?? Carbon::now()),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
