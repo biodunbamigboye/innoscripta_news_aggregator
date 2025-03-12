@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,6 +21,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        $this->configureModelAndDB();
+    }
+
+    public function configureModelAndDB(): void
+    {
+        Model::shouldBeStrict();
+
+        if (app()->isProduction()) {
+            DB::prohibitDestructiveCommands();
+        }
     }
 }
