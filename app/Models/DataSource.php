@@ -23,4 +23,13 @@ class DataSource extends Model
             'filters' => 'array',
         ];
     }
+
+    public function canBeDispatched(): bool
+    {
+        if ($this->last_sync_at === null) {
+            return true;
+        }
+
+        return now()->diffInMinutes($this->last_sync_at) >= $this->sync_interval;
+    }
 }

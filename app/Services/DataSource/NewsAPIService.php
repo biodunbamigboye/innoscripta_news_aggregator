@@ -27,6 +27,10 @@ class NewsAPIService extends DataAggregatorService implements DataSourceContract
 
     public function getNews(DataSource $dataSource, array $parameters = []): ?array
     {
+        if($dataSource->last_published_at){
+            $parameters['from-date'] = $dataSource->last_published_at->addSecond()->format('Y-m-d');
+        }
+
         $response = $this->http->get($dataSource->uri, $parameters)->json();
 
         if ($response['status'] !== 'ok') {

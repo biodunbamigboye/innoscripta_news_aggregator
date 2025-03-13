@@ -28,6 +28,11 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
 
     public function getNews(DataSource $dataSource, array $parameters = []): ?array
     {
+        if($dataSource->last_published_at){
+            $parameters['from'] = $dataSource->last_published_at->addSecond()->format('Y-m-d H:i:s');
+            $parameters['to'] = now()->format('Y-m-d H:i:s');
+        }
+
         $response = $this->http->get($dataSource->uri, $parameters)->json();
 
         if (($response['response']['status'] ?? null) !== 'ok') {
@@ -55,7 +60,7 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
     public function processNews($page = 1): void
     {
         $dataSource = $this->getModel();
-        $this->processLimit = $dataSource->max_processed_per_sync;
+        $this->processLimit = $dataSource->max_article_per_sync;
         $parameters = [...$this->resolveParameters($dataSource), 'page' => $page];
         $response = $this->getNews($dataSource, $parameters);
 
