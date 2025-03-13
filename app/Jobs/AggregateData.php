@@ -28,13 +28,13 @@ class AggregateData implements ShouldQueue
     public function handle(): void
     {
         $dataSourceProvider = match ($this->dataSource->identifier) {
-            'news-api-ai' => new NewsApiAIService(),
-            'the-guardian' => new TheGuardianService(),
-            'news-api' => new NewsAPIService(),
+            'news-api-ai' => new NewsApiAIService,
+            'the-guardian' => new TheGuardianService,
+            'news-api' => new NewsAPIService,
             default => null,
         };
 
-        if(! $dataSourceProvider){
+        if (! $dataSourceProvider) {
             Log::info("Data source provider not found for {$this->dataSource->identifier}");
         }
 

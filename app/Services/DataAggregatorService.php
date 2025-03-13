@@ -8,40 +8,41 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
 
-class DataAggregatorService {
+class DataAggregatorService
+{
     protected PendingRequest $http;
 
     protected int $processCount = 0;
 
     protected ?int $processLimit = null;
 
-    public function resolveParameters(DataSource $dataSource)
-    : array {
+    public function resolveParameters(DataSource $dataSource): array
+    {
 
         return ($dataSource->filters && is_array($dataSource->filters))
             ? collect($dataSource->filters)
                 ->map(function ($filter) {
                     return isset($filter['parameters']) ? $filter['default'] : $filter;
                 })
-                ->filter(fn($filter) => $filter !== null)
+                ->filter(fn ($filter) => $filter !== null)
                 ->toArray()
             : [];
 
     }
 
-    public function getModel()
-    : DataSource {
+    public function getModel(): DataSource
+    {
         return DataSource::where('identifier', $this->identifier)->first();
     }
 
-    public function getNewsContent(string $url)
-    : ?string {
+    public function getNewsContent(string $url): ?string
+    {
         $response = Http::withHeaders([
             'User-Agent' => 'Mozilla/5.0',
         ])
             ->get($url);
 
-        if (!$response->successful()) {
+        if (! $response->successful()) {
             return 'Failed to retrieve content.';
         }
 
@@ -54,8 +55,8 @@ class DataAggregatorService {
 
         // Try to extract the article title
         $titleQuery = '//h1';
-        $titleNode  = $xpath->query($titleQuery);
-        $title      = $titleNode->length ? self::cleanHtml($titleNode->item(0)->nodeValue) : 'No title found';
+        $titleNode = $xpath->query($titleQuery);
+        $title = $titleNode->length ? self::cleanHtml($titleNode->item(0)->nodeValue) : 'No title found';
 
         // Try to extract article content from common article tags
         $articleQueries = [
@@ -70,7 +71,7 @@ class DataAggregatorService {
             $nodes = $xpath->query($query);
             if ($nodes->length) {
                 foreach ($nodes as $node) {
-                    $content .= '<p>' . self::cleanHtml($node->nodeValue) . '</p>';
+                    $content .= '<p>'.self::cleanHtml($node->nodeValue).'</p>';
                 }
                 break;
             }
@@ -83,8 +84,8 @@ class DataAggregatorService {
         return "<section><h1>$title</h1><div>$content</div></section>";
     }
 
-    public static function cleanHtml(string $html)
-    : string {
+    public static function cleanHtml(string $html): string
+    {
         $text = trim($html);
         $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');  // Decode special HTML entities
         $text = preg_replace('/[\x00-\x1F\x7F-\x9F\xAD\xA0]/u', ' ', $text); // Remove non-printable characters
@@ -100,8 +101,7 @@ class DataAggregatorService {
     {
         DataSource::query()->where('is_active', true)->get()
             ->each(function (DataSource $dataSource) {
-               Bus::dispatch(new AggregateData($dataSource));
+                Bus::dispatch(new AggregateData($dataSource));
             });
     }
-
 }

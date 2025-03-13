@@ -28,25 +28,12 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
 
     public function getNews(DataSource $dataSource, array $parameters = []): ?array
     {
-        if($dataSource->last_published_at){
+        if ($dataSource->last_published_at) {
             $parameters['from'] = $dataSource->last_published_at->addSecond()->format('Y-m-d H:i:s');
             $parameters['to'] = now()->format('Y-m-d H:i:s');
         }
 
         $response = $this->http->get($dataSource->uri, $parameters)->json();
-
-        if (($response['response']['status'] ?? null) !== 'ok') {
-            Log::info($response['message'] ?? 'An error occurred while fetching news The Guardian API');
-
-            return $response;
-        }
-
-        return $response;
-    }
-
-    public function getSingleNews(string $identifier)
-    {
-        $response = $this->http->get($identifier, [])->json();
 
         if (($response['response']['status'] ?? null) !== 'ok') {
             Log::info($response['message'] ?? 'An error occurred while fetching news The Guardian API');
@@ -81,7 +68,7 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
                 break;
             }
 
-            $this->storeToDatabase($dataSource, $response['articles']);
+            $this->storeToDatabase($dataSource, $response['response']['results']);
             $this->processLimit += count($response['articles']);
         }
 
@@ -96,7 +83,7 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
         DB::transaction(function () use ($dataSource, $news) {
             // get duplicates in db by data source id and url
             $duplicates = Article::where('data_source_id', $dataSource->id)
-                ->whereIn('story_url', array_column($news, 'url'))
+                ->whereIn('story_url', array_column($news, 'webUrl'))
                 ->get('story_url')
                 ->pluck('story_url')
                 ->toArray();

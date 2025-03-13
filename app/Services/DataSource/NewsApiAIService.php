@@ -28,7 +28,7 @@ class NewsApiAIService extends DataAggregatorService implements DataSourceContra
 
     public function getNews(DataSource $dataSource, array $parameters = []): ?array
     {
-        if($dataSource->last_published_at){
+        if ($dataSource->last_published_at) {
             $parameters['dateStart'] = $dataSource->last_published_at->format('Y-m-d');
             $parameters['dateEnd'] = now()->format('Y-m-d');
         }
