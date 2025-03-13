@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 
 class NewYorkTimesService extends DataAggregatorService implements DataSourceContract
@@ -28,15 +29,7 @@ class NewYorkTimesService extends DataAggregatorService implements DataSourceCon
 
     public function getNews(DataSource $dataSource, array $parameters = []): ?array
     {
-        $response = $this->http->get($dataSource->uri, [])->json();
-
-        //        if (($response['status'] ?? null) !== 'Ok') {
-        //            Log::info($response['message'] ?? 'An error occurred while fetching news, New York Times');
-        //
-        //            return null;
-        //        }
-
-        return $response;
+        return $this->http->get($dataSource->uri, [])->json();
     }
 
     public function processNews($page = 1): void
@@ -94,5 +87,20 @@ class NewYorkTimesService extends DataAggregatorService implements DataSourceCon
                 'last_published_at' => $mostRecentArticle?->published_at ?? now(),
             ]);
         });
+    }
+
+    public function getNewsContent($url): ?string
+    {
+        $process = Process::run("node " . storage_path("app/scraper.js") . " " . escapeshellarg($url));
+
+        dump($process->errorOutput());
+        dump($process->output());
+
+        if ($process->successful()) {
+            $data = json_decode($process->output(), true);
+            return "<h1>{$data['title']}</h1><p>" . nl2br(e($data['content'])) . "</p>";
+        }
+
+        return "Failed to extract content.";
     }
 }
