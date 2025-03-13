@@ -12,7 +12,13 @@ class DataAggregatorService
 {
     protected PendingRequest $http;
 
-    protected int $processCount = 0;
+    public function __destruct()
+    {
+        // clear cache relating to articles
+        cache()->forget('authors');
+        cache()->forget('authors');
+        cache()->forget('categories');
+    }
 
     public function resolveParameters(DataSource $dataSource): array
     {

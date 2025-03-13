@@ -18,6 +18,7 @@ class DataSourceFactory extends Factory
     {
         return [
             'name' => $this->faker->word(),
+            'identifier' => $this->faker->uuid(),
             'uri' => $this->faker->url(),
             'sync_interval' => $this->faker->numberBetween(1, 30),
             'last_sync_at' => $this->faker->dateTime(),
