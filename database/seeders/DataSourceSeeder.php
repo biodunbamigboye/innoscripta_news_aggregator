@@ -45,19 +45,6 @@ class DataSourceSeeder extends Seeder
                 ]),
             ],
             [
-                'name' => 'New York Times',
-                'identifier' => 'new-york-times',
-                'uri' => 'home.json',
-                /*
-                 * The possible uri value are: arts.json, automobiles.json, books/review.json, business.json,
-                 * fashion.json, food.json, health.json, home.json, insider.json, magazine.json,
-                 *  movies.json, nyregion.json, obituaries.json, opinion.json, politics.json, realestate.json,
-                 *  science.json, sports.json, sundayreview.json, technology.json, theater.json, t-magazine.json,
-                 * travel.json, upshot.json, us.json, and world.son
-                 */
-                'filters' => json_encode([]),
-            ],
-            [
                 'name' => 'News API (Everything)',
                 'identifier' => 'news-api',
                 'uri' => 'everything', // can be top-headlines
@@ -89,21 +76,10 @@ class DataSourceSeeder extends Seeder
                 ]),
             ],
             [
-                'name' => 'News API Top Headlines',
-                'identifier' => 'news-api-top-headlines',
-                'uri' => 'top-headlines',
-                'filters' => json_encode([
-                    'country' => [
-                        'parameters' => ['us', 'gb', 'au', 'ca'],
-                        'default' => null,
-                    ],
-                    'category' => [
-                        'parameters' => ['business', 'entertainment', 'general', 'health', 'science', 'sports', 'technology'],
-                        'default' => 'sport',
-                    ],
-                    'pageSize' => 50,
-                    'q' => null,
-                ]),
+                'name' => 'News API ai',
+                'identifier' => 'news-api-ai',
+                'uri' => '',
+                'filters' => json_encode([]),
             ],
 
         ])

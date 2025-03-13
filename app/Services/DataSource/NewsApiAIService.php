@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 
-class NewYorkTimesService extends DataAggregatorService implements DataSourceContract
+class NewsApiAIService extends DataAggregatorService implements DataSourceContract
 {
     protected string $identifier = 'new-york-times';
 
@@ -47,7 +47,6 @@ class NewYorkTimesService extends DataAggregatorService implements DataSourceCon
 
     public function storeToDatabase(DataSource $dataSource, array $news): void
     {
-        Log::info('here');
         DB::transaction(function () use ($dataSource, $news) {
             // get duplicates in db by data source id and url
             $duplicates = Article::where('data_source_id', $dataSource->id)
@@ -89,18 +88,4 @@ class NewYorkTimesService extends DataAggregatorService implements DataSourceCon
         });
     }
 
-    public function getNewsContent($url): ?string
-    {
-        $process = Process::run("node " . storage_path("app/scraper.js") . " " . escapeshellarg($url));
-
-        dump($process->errorOutput());
-        dump($process->output());
-
-        if ($process->successful()) {
-            $data = json_decode($process->output(), true);
-            return "<h1>{$data['title']}</h1><p>" . nl2br(e($data['content'])) . "</p>";
-        }
-
-        return "Failed to extract content.";
-    }
 }
