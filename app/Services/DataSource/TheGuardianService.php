@@ -50,26 +50,11 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
         $parameters = [...$this->resolveParameters($dataSource), 'page' => $page];
         $response = $this->getNews($dataSource, $parameters);
 
-        if (! $response
-        ) {
+        if (! $response) {
             return;
         }
 
         $this->storeToDatabase($dataSource, $response['response']['results']);
-
-        $totalPages = $response['response']['pages'];
-
-        for ($i = 2; $i <= $totalPages; $i++) {
-            $parameters['page'] = $i;
-            $response = $this->getNews($dataSource, $parameters);
-
-            if (! $response) {
-                break;
-            }
-
-            $this->storeToDatabase($dataSource, $response['response']['results']);
-        }
-
     }
 
     public function storeToDatabase(DataSource $dataSource, array $news): void
