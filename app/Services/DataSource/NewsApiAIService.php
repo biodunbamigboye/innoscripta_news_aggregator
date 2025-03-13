@@ -85,6 +85,7 @@ class NewsApiAIService extends DataAggregatorService implements DataSourceContra
                     'updated_at' => now(),
                 ];
             })->filter(fn ($article) => ! in_array($article['story_url'], $duplicates) && $article['content'] !== null)
+                ->unique('story_url')
                 ->all();
 
             Article::insert($articles);

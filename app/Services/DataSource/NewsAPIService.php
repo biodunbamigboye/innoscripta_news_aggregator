@@ -100,6 +100,7 @@ class NewsAPIService extends DataAggregatorService implements DataSourceContract
                     'updated_at' => now(),
                 ];
             })->filter(fn ($article) => ! in_array($article['story_url'], $duplicates) && $article['content'] !== null)
+                ->unique('story_url')
                 ->all();
 
             Article::insert($articles);
