@@ -12,12 +12,10 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
-class TheGuardianService extends DataAggregatorService implements DataSourceContract
-{
+class TheGuardianService extends DataAggregatorService implements DataSourceContract {
     protected string $identifier = 'the-guardian';
 
-    public function __construct()
-    {
+    public function __construct() {
         $this->http = Http::baseUrl(config('aggregators.the_guardian.base_url'))
             ->withHeaders([
                 'Accept' => 'application/json',
@@ -26,11 +24,11 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
             ]);
     }
 
-    public function getNews(DataSource $dataSource, array $parameters = []): ?array
-    {
+    public function getNews(DataSource $dataSource, array $parameters = [])
+    : ?array {
         if ($dataSource->last_published_at) {
             $parameters['from'] = $dataSource->last_published_at->addSecond()->format('Y-m-d H:i:s');
-            $parameters['to'] = now()->format('Y-m-d H:i:s');
+            $parameters['to']   = now()->format('Y-m-d H:i:s');
         }
 
         $response = $this->http->get($dataSource->uri, $parameters)->json();
@@ -44,14 +42,14 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
         return $response;
     }
 
-    public function processNews($page = 1): void
-    {
-        $dataSource = $this->getModel();
+    public function processNews($page = 1)
+    : void {
+        $dataSource         = $this->getModel();
         $this->processLimit = $dataSource->max_article_per_sync;
-        $parameters = [...$this->resolveParameters($dataSource), 'page' => $page];
-        $response = $this->getNews($dataSource, $parameters);
+        $parameters         = [...$this->resolveParameters($dataSource), 'page' => $page];
+        $response           = $this->getNews($dataSource, $parameters);
 
-        if (! $response
+        if (!$response
         ) {
             return;
         }
@@ -62,20 +60,20 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
 
         for ($i = 2; $i <= $totalPages; $i++) {
             $parameters['page'] = $i;
-            $response = $this->getNews($dataSource, $parameters);
+            $response           = $this->getNews($dataSource, $parameters);
 
-            if (! $response || ($this->processLimit && ($this->processLimit <= $this->processCount))) {
+            if (!$response || ($this->processLimit && ($this->processLimit <= $this->processCount))) {
                 break;
             }
 
             $this->storeToDatabase($dataSource, $response['response']['results']);
-            $this->processLimit += count($response['articles']);
+            $this->processLimit += count($response['response']['results']);
         }
 
     }
 
-    public function storeToDatabase(DataSource $dataSource, array $news): void
-    {
+    public function storeToDatabase(DataSource $dataSource, array $news)
+    : void {
         if (empty($news)) {
             return;
         }
@@ -83,29 +81,29 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
         DB::transaction(function () use ($dataSource, $news) {
             // get duplicates in db by data source id and url
             $duplicates = Article::where('data_source_id', $dataSource->id)
-                ->whereIn('story_url', array_column($news, 'webUrl'))
+                ->whereIn('data_source_identifier', array_column($news, 'id'))
                 ->get('story_url')
                 ->pluck('story_url')
                 ->toArray();
 
             $articles = collect($news)->map(function ($item) use ($dataSource) {
                 return [
-                    'id' => (string) Str::ulid(),
-                    'data_source_id' => $dataSource->id,
+                    'id'                     => (string)Str::ulid(),
+                    'data_source_id'         => $dataSource->id,
                     'data_source_identifier' => $item['id'] ?? null,
-                    'author' => $item['author'] ?? null,
-                    'source' => 'The Guardian',
-                    'category' => $item['sectionName'] ?? null,
-                    'title' => $item['webTitle'] ?? '',
-                    'description' => $item['fields']['trailText'] ?? null,
-                    'story_url' => $item['webUrl'] ?? '',
-                    'image_url' => $this->extractCoverImage($item),
-                    'content' => mb_convert_encoding($item['fields']['body'] ?? null, 'UTF-8', 'auto'),
-                    'published_at' => Carbon::parse($item['webPublicationDate'] ?? Carbon::now()),
-                    'created_at' => now(),
-                    'updated_at' => now(),
+                    'author'                 => $item['author'] ?? null,
+                    'source'                 => 'The Guardian',
+                    'category'               => $item['sectionName'] ?? null,
+                    'title'                  => $item['webTitle'] ?? '',
+                    'description'            => $item['fields']['trailText'] ?? null,
+                    'story_url'              => $item['webUrl'] ?? '',
+                    'image_url'              => $this->extractCoverImage($item),
+                    'content'                => mb_convert_encoding($item['fields']['body'] ?? null, 'UTF-8', 'auto'),
+                    'published_at'           => Carbon::parse($item['webPublicationDate'] ?? Carbon::now()),
+                    'created_at'             => now(),
+                    'updated_at'             => now(),
                 ];
-            })->filter(fn ($article) => ! in_array($article['story_url'], $duplicates) && $article['content'] !== null)
+            })->filter(fn($article) => !in_array($article['story_url'], $duplicates) && $article['content'] !== null)
                 ->unique('story_url')
                 ->all();
 
@@ -116,20 +114,20 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
                 ->first('published_at');
 
             $dataSource->update([
-                'last_sync_at' => now(),
+                'last_sync_at'      => now(),
                 'last_published_at' => $mostRecentArticle?->published_at ?? now(),
             ]);
 
         });
     }
 
-    public function getNewsContent(string $url): ?string
-    {
+    public function getNewsContent(string $url)
+    : ?string {
         $response = Http::withQueryParameters([
             'api-key' => config('aggregators.the_guardian.api_key'),
         ])->get($url);
 
-        if (! $response->successful()) {
+        if (!$response->successful()) {
             return 'Failed to retrieve content.';
         }
 
@@ -138,8 +136,8 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
         return $html;
     }
 
-    public function extractCoverImage(array $item): ?string
-    {
+    public function extractCoverImage(array $item)
+    : ?string {
         $src = $this->extractImageSrc($item['fields']['main'] ?? '');
 
         if (empty($src)) {
@@ -149,8 +147,8 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
         return $src;
     }
 
-    public function extractImageSrc(string $html): string
-    {
+    public function extractImageSrc(string $html)
+    : string {
         if (empty($html)) {
             return '';
         }
@@ -162,8 +160,8 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
         return $xpath->evaluate('string(//img/@src)');
     }
 
-    public function extractCoverImageFromBody(string $url): ?string
-    {
+    public function extractCoverImageFromBody(string $url)
+    : ?string {
         // look  for picture tag with itemprop="contentUrl"
 
         $response = Http::withHeaders([
@@ -171,12 +169,12 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
         ])
             ->get($url);
 
-        if (! $response->successful()) {
+        if (!$response->successful()) {
             return null;
         }
 
         $html = $response->body();
-        $dom = new \DOMDocument;
+        $dom  = new \DOMDocument;
         @$dom->loadHTML($html);
         $xpath = new \DOMXPath($dom);
 
