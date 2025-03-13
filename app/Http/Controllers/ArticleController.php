@@ -48,12 +48,18 @@ class ArticleController extends Controller
         return response()->json($article->makeVisible(['content']));
     }
 
-    public function authors(): JsonResponse
+    public function authors(Request $request): JsonResponse
     {
 
         // use  cache
-        $authors = cache()->remember('authors', 3600, function () {
+        $authors = cache()->remember('authors', 3600, function () use ($request) {
             return Article::query()
+                ->when($request->has('search'), function (Builder $query) use ($request) {
+                    $searchKey = "%{$request->get('search')}%";
+                    $query->where(function (Builder $query) use ($searchKey) {
+                        $query->whereLike('author', $searchKey);
+                    });
+                })
                 ->select('author')
                 ->distinct()
                 ->get()
