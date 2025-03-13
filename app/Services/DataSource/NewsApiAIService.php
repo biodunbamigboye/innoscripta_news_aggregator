@@ -10,39 +10,46 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 
 class NewsApiAIService extends DataAggregatorService implements DataSourceContract
 {
-    protected string $identifier = 'new-york-times';
+    protected string $identifier = 'news-api-ai';
 
     public function __construct()
     {
-        $this->http = Http::baseUrl(config('aggregators.new_york_times.base_url'))
+        $this->http = Http::baseUrl(config('aggregators.news_api_ai.base_url'))
             ->withHeaders([
                 'Accept' => 'application/json',
             ])->withQueryParameters([
-                'api-key' => config('aggregators.new_york_times.api_key'),
+                'apiKey' => config('aggregators.news_api_ai.api_key'),
             ]);
     }
 
     public function getNews(DataSource $dataSource, array $parameters = []): ?array
     {
-        return $this->http->get($dataSource->uri, [])->json();
+        $response = $this->http->get($dataSource->uri, $parameters)->json();
+
+        if (! isset($response['articles']['results'])) {
+            Log::error('Failed to retrieve news from News API AI.', $response);
+
+            return null;
+        }
+
+        return $response['articles']['results'];
     }
 
     public function processNews($page = 1): void
     {
         $dataSource = $this->getModel();
-        $response = $this->getNews($dataSource);
+        $response = $this->getNews($dataSource, $this->resolveParameters($dataSource));
 
         if (! $response
         ) {
             return;
         }
 
-        $this->storeToDatabase($dataSource, $response['results']);
+        $this->storeToDatabase($dataSource, $response);
     }
 
     public function storeToDatabase(DataSource $dataSource, array $news): void
@@ -60,15 +67,15 @@ class NewsApiAIService extends DataAggregatorService implements DataSourceContra
                     'id' => (string) Str::ulid(),
                     'data_source_id' => $dataSource->id,
                     'data_source_identifier' => $item['uri'] ?? null,
-                    'category' => $item['section'] ?? null,
-                    'author' => $item['byline'] ?? null,
-                    'source' => 'The New York Times',
+                    'category' => $dataSource['filters']['keyword'] ?? null,
+                    'author' => implode(', ', array_column($item['authors'], 'name')), // compute authors
+                    'source' => $item['source']['uri'] ?? null,
                     'title' => $item['title'] ?? '',
-                    'description' => $item['abstract'] ?? null,
+                    'description' => mb_convert_encoding(substr($item['body'], 0, 100), 'UTF-8', 'auto'),
                     'story_url' => $item['url'],
-                    'image_url' => $item['multimedia'][0]['url'] ?? null,
-                    'content' => self::getNewsContent($item['url']),
-                    'published_at' => Carbon::parse($item['published_date'] ?? Carbon::now()),
+                    'image_url' => $item['image'] ?? null,
+                    'content' => mb_convert_encoding($item['body'], 'UTF-8', 'auto'),
+                    'published_at' => Carbon::parse($item['2025-03-13T06:30:14'] ?? Carbon::now()),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
@@ -87,5 +94,4 @@ class NewsApiAIService extends DataAggregatorService implements DataSourceContra
             ]);
         });
     }
-
 }

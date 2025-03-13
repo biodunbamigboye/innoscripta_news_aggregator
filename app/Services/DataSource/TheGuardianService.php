@@ -109,7 +109,7 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
                     'description' => $item['fields']['trailText'] ?? null,
                     'story_url' => $item['webUrl'] ?? '',
                     'image_url' => $this->extractCoverImage($item),
-                    'content' => $item['fields']['body'] ?? null,
+                    'content' => mb_convert_encoding($item['fields']['body'] ?? null, 'UTF-8', 'auto'),
                     'published_at' => Carbon::parse($item['webPublicationDate'] ?? Carbon::now()),
                     'created_at' => now(),
                     'updated_at' => now(),

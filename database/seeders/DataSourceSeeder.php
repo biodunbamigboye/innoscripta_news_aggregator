@@ -79,7 +79,14 @@ class DataSourceSeeder extends Seeder
                 'name' => 'News API ai',
                 'identifier' => 'news-api-ai',
                 'uri' => '',
-                'filters' => json_encode([]),
+                'filters' => json_encode([
+                    'dataType' => 'news',
+                    'articlesPage' => 1,
+                    'articlesCount' => 20,
+                    'articlesSortBy' => 'date',
+                    'articlesSortByAsc' => false,
+                    'keyword' => 'world',
+                ]),
             ],
 
         ])

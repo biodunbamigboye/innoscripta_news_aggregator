@@ -14,7 +14,7 @@ return [
         'base_url' => env('NEWS_API_BASE_URL', ''),
     ],
     'news_api_ai' => [
-        'api_key' => env('NEWS_API_AI_KEY', ''),
+        'api_key' => env('NEWS_API_AI_API_KEY', ''),
         'base_url' => env('NEWS_API_AI_BASE_URL', ''),
     ],
 ];
