@@ -33,7 +33,7 @@ return new class extends Migration
         that will be used by the application
         */
 
-        Artisan::call('db:seed', ['--class' => 'DataSourceSeeder']);
+        //        Artisan::call('db:seed', ['--class' => 'DataSourceSeeder']);
     }
 
     /**

@@ -68,18 +68,17 @@ class TheGuardianService extends DataAggregatorService implements DataSourceCont
 
         $totalPages = $response['response']['pages'];
 
-        //        for ($i = 2; $i <= $totalPages; $i++) {
-        //            dump("Loop $i");
-        //            $parameters['page'] = $i;
-        //            $response = $this->getNews($dataSource, $parameters);
-        //
-        //            if (! $response || ($this->processLimit && ($this->processLimit <= $this->processCount))) {
-        //                break;
-        //            }
-        //
-        //            $this->storeToDatabase($dataSource, $response['articles']);
-        //            $this->processLimit += count($response['articles']);
-        //        }
+        for ($i = 2; $i <= $totalPages; $i++) {
+            $parameters['page'] = $i;
+            $response = $this->getNews($dataSource, $parameters);
+
+            if (! $response || ($this->processLimit && ($this->processLimit <= $this->processCount))) {
+                break;
+            }
+
+            $this->storeToDatabase($dataSource, $response['articles']);
+            $this->processLimit += count($response['articles']);
+        }
 
     }
 

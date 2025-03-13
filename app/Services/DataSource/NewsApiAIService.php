@@ -44,8 +44,7 @@ class NewsApiAIService extends DataAggregatorService implements DataSourceContra
         $dataSource = $this->getModel();
         $response = $this->getNews($dataSource, $this->resolveParameters($dataSource));
 
-        if (! $response
-        ) {
+        if (! $response) {
             return;
         }
 
@@ -54,6 +53,7 @@ class NewsApiAIService extends DataAggregatorService implements DataSourceContra
 
     public function storeToDatabase(DataSource $dataSource, array $news): void
     {
+
         DB::transaction(function () use ($dataSource, $news) {
             // get duplicates in db by data source id and url
             $duplicates = Article::where('data_source_id', $dataSource->id)
@@ -62,19 +62,19 @@ class NewsApiAIService extends DataAggregatorService implements DataSourceContra
                 ->pluck('story_url')
                 ->toArray();
 
-            $articles = collect($news)->map(function ($item) use ($dataSource) {
+            $articles = collect($news)->map(function (array $item) use ($dataSource) {
                 return [
                     'id' => (string) Str::ulid(),
                     'data_source_id' => $dataSource->id,
                     'data_source_identifier' => $item['uri'] ?? null,
                     'category' => $dataSource['filters']['keyword'] ?? null,
-                    'author' => implode(', ', array_column($item['authors'], 'name')), // compute authors
+                    'author' => implode(', ', array_column($item['authors'] ?? [], 'name')), // compute authors
                     'source' => $item['source']['uri'] ?? null,
                     'title' => $item['title'] ?? '',
-                    'description' => mb_convert_encoding(substr($item['body'], 0, 100), 'UTF-8', 'auto'),
-                    'story_url' => $item['url'],
+                    'description' => mb_convert_encoding(substr($item['body'] ?? '', 0, 100), 'UTF-8', 'auto'),
+                    'story_url' => $item['url'] ?? null,
                     'image_url' => $item['image'] ?? null,
-                    'content' => mb_convert_encoding($item['body'], 'UTF-8', 'auto'),
+                    'content' => mb_convert_encoding($item['body'] ?? '', 'UTF-8', 'auto'),
                     'published_at' => Carbon::parse($item['2025-03-13T06:30:14'] ?? Carbon::now()),
                     'created_at' => now(),
                     'updated_at' => now(),
