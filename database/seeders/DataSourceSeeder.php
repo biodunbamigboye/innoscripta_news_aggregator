@@ -45,7 +45,7 @@ class DataSourceSeeder extends Seeder
                 ]),
             ],
             [
-                'name' => 'News API (Everything)',
+                'name' => 'News API',
                 'identifier' => 'news-api',
                 'uri' => 'everything', // can be top-headlines
                 'filters' => json_encode([
