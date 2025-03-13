@@ -34,7 +34,7 @@ class DataSourceSeeder extends Seeder
                         'default' => 'all',
                     ],
                     'page' => 1,
-                    'page-size' => 50,
+                    'page-size' => 20,
                     'order-by' => [
                         'parameters' => ['newest', 'oldest', 'relevance'],
                         'default' => 'newest',
@@ -69,7 +69,7 @@ class DataSourceSeeder extends Seeder
                         'parameters' => ['publishedAt', 'popularity', 'relevancy'],
                         'default' => 'publishedAt',
                     ],
-                    'pageSize' => 50,
+                    'pageSize' => 20,
                     'q' => null,
                     'from' => null,
                     'to' => null,

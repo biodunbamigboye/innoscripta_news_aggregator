@@ -17,7 +17,12 @@ class DataSourceFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->word(),
+            'uri' => $this->faker->url(),
+            'sync_interval' => $this->faker->numberBetween(1, 30),
+            'last_sync_at' => $this->faker->dateTime(),
+            'last_published_at' => $this->faker->dateTime(),
+            'filters' => [],
         ];
     }
 }

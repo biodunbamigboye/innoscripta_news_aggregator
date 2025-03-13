@@ -14,8 +14,6 @@ class DataAggregatorService
 
     protected int $processCount = 0;
 
-    protected ?int $processLimit = null;
-
     public function resolveParameters(DataSource $dataSource): array
     {
 

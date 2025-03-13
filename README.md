@@ -21,4 +21,3 @@ This platform aggregates news from different platforms using api Integrations, f
 
 ## Data Source  Model
 - Contains the Data aggregate Services
-- If `max_article_per_sync` is null, it will process all the data, not recommended for large data

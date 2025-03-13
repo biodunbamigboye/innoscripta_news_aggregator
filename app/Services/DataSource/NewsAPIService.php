@@ -63,12 +63,11 @@ class NewsAPIService extends DataAggregatorService implements DataSourceContract
             $parameters['page'] = $i;
             $response = $this->getNews($dataSource, $parameters);
 
-            if (! $response || ($this->processLimit && ($this->processLimit <= $this->processCount))) {
+            if (! $response) {
                 break;
             }
 
             $this->storeToDatabase($dataSource, $response['articles']);
-            $this->processLimit += count($response['articles']);
         }
 
     }

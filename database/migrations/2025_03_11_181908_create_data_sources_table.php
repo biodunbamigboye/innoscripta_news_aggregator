@@ -18,8 +18,7 @@ return new class extends Migration
             $table->string('identifier', 50)->unique();
             $table->string('uri')->default('');
             $table->boolean('is_active')->default(true);
-            $table->integer('sync_interval')->default(60);
-            $table->integer('max_article_per_sync')->default(500);
+            $table->integer('sync_interval')->default(5);
             $table->timestamp('last_sync_at')->nullable();
             $table->timestamp('last_published_at')->nullable();
             $table->json('filters')->nullable();
