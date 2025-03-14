@@ -7,7 +7,6 @@ use App\Models\DataSource;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
 class DataAggregatorService
 {
@@ -106,7 +105,7 @@ class DataAggregatorService
     {
         DataSource::query()->where('is_active', true)->get()
             ->each(function (DataSource $dataSource) {
-                if($dataSource->canBeDispatched()){
+                if ($dataSource->canBeDispatched()) {
                     Bus::dispatch(new AggregateData($dataSource));
                 }
             });

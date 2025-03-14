@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
+use App\Services\ArticleService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 class ArticleController extends Controller
@@ -18,34 +18,22 @@ class ArticleController extends Controller
             'sort' => ['sometimes', Rule::in(['asc', 'desc'])],
         ]);
 
-        return Article::query()
-            ->orderBy('published_at', $request->get('sort', 'desc'))
-            ->when($request->has('search'), function (Builder $query) use ($request) {
-                $searchKey = "%{$request->get('search')}%";
-                $query->where(function (Builder $query) use ($searchKey) {
-                    $query->whereLike('title', $searchKey)
-                        ->orWhereLike('description', $searchKey)
-                        ->orWhereLike('category', $searchKey)
-                        ->orWhereLike('author', $searchKey)
-                        ->orWhereLike('source', $searchKey);
-                });
-            })
-            ->when($request->has('author'), fn (Builder $query) => $query->where('author', $request->get('author')))
-            ->when($request->has('source'), fn (Builder $query) => $query->where('source', $request->get('source')))
-            ->when($request->has('category'), fn (Builder $query) => $query->where('category', $request->get('category')))
-            ->when($request->has('date'), fn (Builder $query) => $query->whereDate('published_at', $request->get('date')))
-            ->when($request->has('from_date') && ! $request->has('to_date'), fn (Builder $query) => $query->whereDate('published_at', '>=', $request->get('from_date')))
-            ->when($request->has(['from_date', 'to_date']), function (Builder $query) use ($request) {
-                $query->whereBetween('published_at', [
-                    Carbon::parse($request->get('from_date'))->startOfDay(),
-                    Carbon::parse($request->get('to_date'))->endOfDay(),
-                ]);
-            })
-            ->select(['id', 'title', 'description', 'category', 'author', 'source', 'published_at', 'story_url', 'image_url'])
-            ->paginate(
-                perPage: min($request->get('per_page', 30), 60),
-                page: $request->get('page', 1),
-            );
+        $constraints = $request->only([
+            'search',
+            'author',
+            'source',
+            'category',
+            'date',
+            'from_date',
+            'to_date',
+        ]);
+
+        return ArticleService::getArticles(
+            constraints: $constraints,
+            sort: $request->get('sort', 'desc'),
+            perPage: $request->get('per_page', 30),
+            page: $request->get('page', 1)
+        );
     }
 
     public function show(Article $article): JsonResponse

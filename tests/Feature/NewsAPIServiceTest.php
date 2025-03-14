@@ -57,5 +57,4 @@ class NewsAPIServiceTest extends TestCase
         $this->assertCount(1, Article::all());
         $this->assertEquals('Test Article', Article::first()->title);
     }
-
 }

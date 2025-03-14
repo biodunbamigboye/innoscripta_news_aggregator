@@ -17,7 +17,7 @@ class DataSourceController extends Controller
             ->when($request->has('search'), function ($query) use ($request) {
                 $query->whereLike('name', "%{$request->get('search')}%");
             })
-            ->when($request->has('is_active'), fn($query) => $query->where('is_active', $request->get('is_active')))
+            ->when($request->has('is_active'), fn ($query) => $query->where('is_active', $request->get('is_active')))
             ->paginate(
                 perPage: min($request->get('per_page', 20), 60),
                 page: $request->get('page', 1),

@@ -34,7 +34,7 @@ class DataSourceSeeder extends Seeder
                         'default' => 'all',
                     ],
                     'page' => 1,
-                    'page-size' => 20,
+                    'page-size' => 5,
                     'order-by' => [
                         'parameters' => ['newest', 'oldest', 'relevance'],
                         'default' => 'newest',
@@ -69,7 +69,7 @@ class DataSourceSeeder extends Seeder
                         'parameters' => ['publishedAt', 'popularity', 'relevancy'],
                         'default' => 'publishedAt',
                     ],
-                    'pageSize' => 20,
+                    'pageSize' => 5,
                     'q' => null,
                     'from' => null,
                     'to' => null,
@@ -82,7 +82,7 @@ class DataSourceSeeder extends Seeder
                 'filters' => json_encode([
                     'dataType' => 'news',
                     'articlesPage' => 1,
-                    'articlesCount' => 20,
+                    'articlesCount' => 5,
                     'articlesSortBy' => 'date',
                     'articlesSortByAsc' => false,
                     'keyword' => 'world',
