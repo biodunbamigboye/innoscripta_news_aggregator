@@ -51,7 +51,10 @@ class ArticleController extends Controller
     public function authors(Request $request): JsonResponse
     {
 
-        // use  cache
+        if($request->has('search')){
+            cache()->forget('authors');
+        }
+
         $authors = cache()->remember('authors', 3600, function () use ($request) {
             return Article::query()
                 ->when($request->has('search'), function (Builder $query) use ($request) {
@@ -71,10 +74,20 @@ class ArticleController extends Controller
         return response()->json($authors);
     }
 
-    public function sources(): JsonResponse
+    public function sources(Request $request): JsonResponse
     {
-        $sources = cache()->remember('sources', 3600, function () {
+        if($request->has('search')){
+            cache()->forget('sources');
+        }
+
+        $sources = cache()->remember('sources', 3600, function () use ($request) {
             return Article::query()
+                ->when($request->has('search'), function (Builder $query) use ($request) {
+                    $searchKey = "%{$request->get('search')}%";
+                    $query->where(function (Builder $query) use ($searchKey) {
+                        $query->whereLike('source', $searchKey);
+                    });
+                })
                 ->select('source')
                 ->distinct()
                 ->get()
@@ -86,10 +99,20 @@ class ArticleController extends Controller
         return response()->json($sources);
     }
 
-    public function categories(): JsonResponse
+    public function categories(Request $request): JsonResponse
     {
-        $categories = cache()->remember('categories', 3600, function () {
+        if($request->has('search')){
+            cache()->forget('categories');
+        }
+
+        $categories = cache()->remember('categories', 3600, function () use ($request) {
             return Article::query()
+                ->when($request->has('search'), function (Builder $query) use ($request) {
+                    $searchKey = "%{$request->get('search')}%";
+                    $query->where(function (Builder $query) use ($searchKey) {
+                        $query->whereLike('category', $searchKey);
+                    });
+                })
                 ->select('category')
                 ->distinct()
                 ->get()
