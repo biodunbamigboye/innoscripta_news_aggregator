@@ -12,7 +12,7 @@ class CreateDataSourceRequest extends FormRequest
         return [
             'name' => ['required', 'string', 'max:50', Rule::unique('data_sources', 'name')],
             'identifier' => ['required', 'string', 'max:50', Rule::unique('data_sources', 'identifier')],
-            'uri' => ['required', 'string'],
+            'uri' => ['sometimes', 'nullable', 'string'],
             'is_active' => ['sometimes', 'boolean'],
             'sync_interval' => ['sometimes', 'integer', 'min:1'],
             'filters' => ['sometimes', 'array'],

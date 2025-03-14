@@ -11,7 +11,7 @@ class UpdateDataSourceRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'string', 'max:50', Rule::unique('data_sources', 'name')->ignore($this->route('dataSource'))],
-            'uri' => ['sometimes', 'string'],
+            'uri' => ['sometimes', 'nullable', 'string'],
             'is_active' => ['sometimes', 'boolean'],
             'sync_interval' => ['sometimes', 'integer', 'min:1'],
             'filters' => ['sometimes', 'array'],
