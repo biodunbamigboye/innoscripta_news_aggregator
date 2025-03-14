@@ -3,5 +3,5 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return "News Aggregator API";
+    return 'News Aggregator API';
 });

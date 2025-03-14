@@ -17,8 +17,8 @@ class DataSourceFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word(),
-            'identifier' => $this->faker->uuid(),
+            'name' => $this->faker->unique()->word(),
+            'identifier' => $this->faker->unique()->uuid(),
             'uri' => $this->faker->url(),
             'sync_interval' => $this->faker->numberBetween(1, 30),
             'last_sync_at' => $this->faker->dateTime(),

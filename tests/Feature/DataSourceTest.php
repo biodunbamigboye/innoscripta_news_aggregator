@@ -51,7 +51,10 @@ class DataSourceTest extends TestCase
                 'uri' => 'https://example.com/data-source',
                 'is_active' => true,
                 'sync_interval' => 60,
-                'filters' => ['filter1', 'filter2'],
+                'filters' => [
+                    'page' => 1,
+                    'limit' => 10,
+                ],
             ]);
 
         $this->assertEquals($countBefore + 1, count(DataSource::all()));
