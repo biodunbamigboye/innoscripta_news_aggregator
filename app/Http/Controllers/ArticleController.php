@@ -8,12 +8,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
+use Illuminate\Validation\Rule;
 
 class ArticleController extends Controller
 {
     public function index(Request $request): LengthAwarePaginator
     {
-        $request->validate(['sort' => 'sometimes','in:asc,desc']);
+        $request->validate([
+            'sort' => ['sometimes', Rule::in(['asc', 'desc'])],
+        ]);
 
         return Article::query()
             ->orderBy('published_at', $request->get('sort', 'desc'))
