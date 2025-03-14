@@ -14,7 +14,7 @@ This platform aggregates news from different platforms using api Integrations, f
 - Install the requirements using `composer install`
 - Create a `.env` file by copying the `.env.example` file
 - Generate a new key using `php artisan key:generate`
-- Add the database credentials to the `.env` file for convenience a remote database has been provided
+- Add the database credentials to the `.env` file for convenience a remote database has been provided(Note: using the provided remote DB will reduce application speed)
 - Add the api keys for the different sources to the `.env` file
 - Run the migrations and seed database using `php artisan migrate:fresh --seed`
 - Run the application using `php artisan serve`
