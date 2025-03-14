@@ -31,6 +31,8 @@ class NewsAPIService extends DataAggregatorService implements DataSourceContract
             $parameters['from-date'] = $dataSource->last_published_at->addSecond()->format('Y-m-d');
         }
 
+        $parameters['pageSize'] = min($parameters['pageSize'] ?? 100, 100);
+
         $response = $this->http->get($dataSource->uri, $parameters)->json();
 
         if ($response['status'] !== 'ok') {
@@ -54,22 +56,6 @@ class NewsAPIService extends DataAggregatorService implements DataSourceContract
         }
 
         $this->storeToDatabase($dataSource, $response['articles']);
-
-        $perPage = $parameters['pageSize'];
-        $totalResults = $response['totalResults'];
-        $totalPages = ceil($totalResults / $perPage);
-
-        for ($i = 2; $i <= $totalPages; $i++) {
-            $parameters['page'] = $i;
-            $response = $this->getNews($dataSource, $parameters);
-
-            if (! $response) {
-                break;
-            }
-
-            $this->storeToDatabase($dataSource, $response['articles']);
-        }
-
     }
 
     public function storeToDatabase(DataSource $dataSource, array $news): void

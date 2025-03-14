@@ -20,7 +20,7 @@ class ArticleFactory extends Factory
             'content' => $this->faker->paragraphs(3, true),
             'author' => $this->faker->unique()->name(),
             'category' => $this->faker->unique()->word,
-            'source' => $this->faker->company,
+            'source' => $this->faker->unique()->company(),
             'published_at' => $this->faker->dateTime,
             'data_source_identifier' => 'the-guardian',
         ];

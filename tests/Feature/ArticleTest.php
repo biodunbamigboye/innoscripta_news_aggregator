@@ -94,6 +94,19 @@ class ArticleTest extends TestCase
             ->assertJsonCount(20);
     }
 
+    public function test_it_can_search_authors()
+    {
+        $dataSource = \App\Models\DataSource::factory()->create();
+
+        Article::factory()->count(20)->for($dataSource)->create();
+
+        Article::factory()->count(4)->for($dataSource)->create(['author' => 'John Doe']);
+
+        $this->getJson(route('Get Authors', ['search' => 'John Doe']))
+            ->assertOk()
+            ->assertJsonCount(1);
+    }
+
     public function test_it_can_get_sources()
     {
         $dataSource = \App\Models\DataSource::factory()->create();
@@ -106,6 +119,20 @@ class ArticleTest extends TestCase
             ->assertJsonCount(20);
     }
 
+    public function test_it_can_search_sources()
+    {
+        $dataSource = \App\Models\DataSource::factory()->create();
+
+        Article::factory()->count(3)->for($dataSource)->create();
+
+        Article::factory()->count(2)->for($dataSource)->create(['source' => 'BBC']);
+
+        $this->getJson(route('Get Sources', ['search' => 'BBC']))
+            ->assertOk()
+            ->dump()
+            ->assertJsonCount(1);
+    }
+
     public function test_it_can_get_categories()
     {
         $dataSource = \App\Models\DataSource::factory()->create();
@@ -115,6 +142,19 @@ class ArticleTest extends TestCase
         $this->getJson(route('Get Categories'))
             ->assertOk()
             ->assertJsonCount(20);
+    }
+
+    public function test_it_can_search_categories()
+    {
+        $dataSource = \App\Models\DataSource::factory()->create();
+
+        Article::factory()->count(3)->for($dataSource)->create();
+
+        Article::factory()->count(2)->for($dataSource)->create(['category' => 'Technology']);
+
+        $this->getJson(route('Get Categories', ['search' => 'Technology']))
+            ->assertOk()
+            ->assertJsonCount(1);
     }
 
     public function test_it_can_filter_by_author()

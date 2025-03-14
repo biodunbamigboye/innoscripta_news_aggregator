@@ -51,23 +51,19 @@ class ArticleController extends Controller
     public function authors(Request $request): JsonResponse
     {
 
-        if($request->has('search')){
+        if ($request->has('search')) {
             cache()->forget('authors');
         }
 
         $authors = cache()->remember('authors', 3600, function () use ($request) {
             return Article::query()
                 ->when($request->has('search'), function (Builder $query) use ($request) {
-                    $searchKey = "%{$request->get('search')}%";
-                    $query->where(function (Builder $query) use ($searchKey) {
-                        $query->whereLike('author', $searchKey);
-                    });
+                    $query->whereLike('author', "%{$request->get('search')}%");
                 })
                 ->select('author')
                 ->distinct()
                 ->get()
                 ->pluck('author')
-                ->filter()
                 ->values();
         });
 
@@ -76,23 +72,19 @@ class ArticleController extends Controller
 
     public function sources(Request $request): JsonResponse
     {
-        if($request->has('search')){
+        if ($request->has('search')) {
             cache()->forget('sources');
         }
 
         $sources = cache()->remember('sources', 3600, function () use ($request) {
             return Article::query()
                 ->when($request->has('search'), function (Builder $query) use ($request) {
-                    $searchKey = "%{$request->get('search')}%";
-                    $query->where(function (Builder $query) use ($searchKey) {
-                        $query->whereLike('source', $searchKey);
-                    });
+                    $query->whereLike('source', "%{$request->get('search')}%");
                 })
                 ->select('source')
                 ->distinct()
                 ->get()
                 ->pluck('source')
-                ->filter()
                 ->values();
         });
 
@@ -101,17 +93,14 @@ class ArticleController extends Controller
 
     public function categories(Request $request): JsonResponse
     {
-        if($request->has('search')){
+        if ($request->has('search')) {
             cache()->forget('categories');
         }
 
         $categories = cache()->remember('categories', 3600, function () use ($request) {
             return Article::query()
                 ->when($request->has('search'), function (Builder $query) use ($request) {
-                    $searchKey = "%{$request->get('search')}%";
-                    $query->where(function (Builder $query) use ($searchKey) {
-                        $query->whereLike('category', $searchKey);
-                    });
+                    $query->whereLike('category', "%{$request->get('search')}%");
                 })
                 ->select('category')
                 ->distinct()
