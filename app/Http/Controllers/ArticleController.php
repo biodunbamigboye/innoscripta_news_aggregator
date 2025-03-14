@@ -13,8 +13,10 @@ class ArticleController extends Controller
 {
     public function index(Request $request): LengthAwarePaginator
     {
+        $request->validate(['sort' => 'sometimes','in:asc,desc']);
+
         return Article::query()
-            ->orderByDesc('published_at')
+            ->orderBy('published_at', $request->get('sort', 'desc'))
             ->when($request->has('search'), function (Builder $query) use ($request) {
                 $searchKey = "%{$request->get('search')}%";
                 $query->where(function (Builder $query) use ($searchKey) {
