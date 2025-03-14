@@ -106,7 +106,9 @@ class DataAggregatorService
     {
         DataSource::query()->where('is_active', true)->get()
             ->each(function (DataSource $dataSource) {
-                Bus::dispatch(new AggregateData($dataSource));
+                if($dataSource->canBeDispatched()){
+                    Bus::dispatch(new AggregateData($dataSource));
+                }
             });
     }
 }

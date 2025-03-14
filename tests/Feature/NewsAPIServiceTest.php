@@ -13,7 +13,7 @@ class NewsAPIServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_process_news(): void
+    public function test_can_process_news(): void
     {
         // Create a mock DataSource
         $dataSource = DataSource::factory()->create([
@@ -57,4 +57,5 @@ class NewsAPIServiceTest extends TestCase
         $this->assertCount(1, Article::all());
         $this->assertEquals('Test Article', Article::first()->title);
     }
+
 }

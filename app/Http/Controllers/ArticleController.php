@@ -69,6 +69,7 @@ class ArticleController extends Controller
                 ->distinct()
                 ->get()
                 ->pluck('author')
+                ->filter()
                 ->values();
         });
 
@@ -90,6 +91,7 @@ class ArticleController extends Controller
                 ->distinct()
                 ->get()
                 ->pluck('source')
+                ->filter()
                 ->values();
         });
 

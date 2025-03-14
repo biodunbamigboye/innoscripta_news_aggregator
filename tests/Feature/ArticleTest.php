@@ -129,7 +129,6 @@ class ArticleTest extends TestCase
 
         $this->getJson(route('Get Sources', ['search' => 'BBC']))
             ->assertOk()
-            ->dump()
             ->assertJsonCount(1);
     }
 
