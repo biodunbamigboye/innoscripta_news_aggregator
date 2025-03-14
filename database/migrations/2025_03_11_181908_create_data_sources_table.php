@@ -16,7 +16,7 @@ return new class extends Migration
             $table->id();
             $table->string('name', 50)->unique();
             $table->string('identifier', 50)->unique();
-            $table->string('uri')->default('');
+            $table->string('uri')->default('')->nullable();
             $table->boolean('is_active')->default(true);
             $table->integer('sync_interval')->default(5);
             $table->timestamp('last_sync_at')->nullable();
